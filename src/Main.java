@@ -7,113 +7,55 @@ import java.util.regex.Pattern;
 
 public class Main {
 
-    public static void parseRGW() throws IOException {
-        String directoryPath = "/home/matejik/cdr/";
-        String csvRepository = "/home/matejik/csv-repository/";
-        File directory = new File(directoryPath);
-
-        Pattern pattern = Pattern.compile("rgwlog");
-
-        RGWParser parser = new RGWParser(csvRepository, directoryPath);
-
-        if (directory.exists() && directory.isDirectory()) {
-            File[] allFiles = directory.listFiles();
-
-            for (File file : allFiles) {
-                if (file.isFile()) {
-                    String fileName = file.getName();
-
-                    Matcher matcher = pattern.matcher(fileName);
-                    if (matcher.find()) {
-                        try {
-                            parser.parseCdrFile(file.getPath());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-
-            parser.parseClose();
-        } else {
-            System.out.println("Directory does not exist or is not a directory.");
-        }
-    }
-
-    public static void parseAllFiles() throws IOException {
-//        String directoryPath = "/home/matejik/cdr/";
-//        String csvRepository = "/home/matejik/csv-repository/";
-        String directoryPath = "C:\\Users\\jakub_w7ohip9\\git\\cdrparser\\cdr\\";
-        String csvRepository = "C:\\Users\\jakub_w7ohip9\\git\\cdrparser\\csv\\";
-        File directory = new File(directoryPath);
-        CDRParser parser = new CDRParser(csvRepository, directoryPath);
-
-        parser.parseCdrFile(directoryPath + "cucm_hk_cdr_from_june.txt");
-        parser.parseClose();
-    }
-
-
-
-    public static void parseCDRFilesWithDate() throws IOException {
-        String directoryPath = "/home/matejik/cdr/";
-        String csvRepository = "/home/matejik/csv-repository/";
-        File directory = new File(directoryPath);
-
-        Pattern pattern = Pattern.compile("\\d{8}\\d{4}");
-
+    public static void parseCDRFilesWithDate() {
+        String cdrRepositoryValue = "/home/matejik/git/cdrparser/cdr/";
+        String rgwRepositoryValue = "/home/matejik/git/cdrparser/rgw/";
+        String csvRepository = "/home/matejik/git/cdrparser/csv-repository/";
+        Pattern pattern = Pattern.compile("\\d{8}");
         Date startDate, endDate;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-
+        SimpleDateFormat sdf = new SimpleDateFormat("MMddyyyy");
         try {
-            startDate = sdf.parse("202308050000"); // Example start date
-            endDate = sdf.parse("202309100000");   // Example end date
+            startDate = sdf.parse("05082023");
+            endDate = sdf.parse("09122023");
         } catch (ParseException e) {
             e.printStackTrace();
             return;
         }
-
-        CDRParser parser = new CDRParser(csvRepository, directoryPath);
-
-        if (directory.exists() && directory.isDirectory()) {
-            File[] allFiles = directory.listFiles();
-
-            for (File file : allFiles) {
-                if (file.isFile()) {
-                    String fileName = file.getName();
-
-                    Matcher matcher = pattern.matcher(fileName);
-                    if (matcher.find()) {
-                        String dateString = matcher.group();
-
-                        try {
-
-                            Date date = sdf.parse(dateString);
-
-                            if (date.after(startDate) && date.before(endDate)) {
-
-                                try {
-                                    parser.parseCdrFile(file.getPath());
-                                } catch (IOException e) {
-                                    e.printStackTrace();
+        String filename = cdrRepositoryValue + "cdr_statistics_" + System.currentTimeMillis() + ".csv";
+        try {
+            File directory = new File(cdrRepositoryValue);
+            if (directory.exists() && directory.isDirectory()) {
+                File[] allFiles = directory.listFiles();
+                CDRParser parser = new CDRParser(cdrRepositoryValue, filename);
+                for (File file : allFiles) {
+                    if (file.isFile()) {
+                        String fileName = file.getName();
+                        Matcher matcher = pattern.matcher(fileName);
+                        if (matcher.find()) {
+                            String dateString = matcher.group();
+                            try {
+                                Date date = sdf.parse(dateString);
+                                if (date.after(startDate) && date.before(endDate)) {
+                                    try {
+                                        parser.parseFile(file.getPath());
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
-
+                            } catch (ParseException e) {
+                                e.printStackTrace();
                             }
-                        } catch (ParseException e) {
-                            e.printStackTrace();
                         }
                     }
                 }
+                parser.parseClose();
             }
-
-            parser.parseClose();
-        } else {
-            System.out.println("Directory does not exist or is not a directory.");
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 
     public static void main(String[] args) throws IOException {
-//        parseCDRFilesWithDate();
-//        parseRGW();
-        parseAllFiles();
+        parseCDRFilesWithDate();
     }
 }

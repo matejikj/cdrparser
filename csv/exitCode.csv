@@ -1,2 +1,28 @@
 ﻿exitCode;zpráva;úspěch
-404 - Position of radio is unknow*;404 Neznámá pozice rádia;FALSE
+404 - Position of radio is unknow;404 Neznámá pozice rádia;FALSE
+Can't find last area for radio;Neznámá pozice rádia;FALSE
+408 Request timeout, radio;408 Montér hovor nevyzvedl;FALSE
+408 Request timeout, dispatcher;408 Dispečer hovor nevyzvedl;FALSE
+Ignore request due to busy state of FSM;Rádio se pokouší začít nový hovor, aniž by ukončilo předchozí;FALSE
+Rgw, where radio is located, is used by another call.;Žádost o hovor ignorována kvůli probíhajícímu hovoru;FALSE
+404 Radio did not start ringing;404 Rádio nezačalo vyzvánět;FALSE
+200 Connected call ended while starting;200 CHYBA - hovor nepřešel do správného stavu;FALSE
+Radio button was not configured, ignoring;Tlačítko na rádiu není nakonfigurováno;FALSE
+404;404 Volání na neznámé rádio;FALSE
+487;487 Obsazeno;FALSE
+403;403 Zakázaná komunikace;FALSE
+480;480 Dočasně nedostupný;FALSE
+486;486 Obsazeno;FALSE
+null;CHYBA - hovor nepřešel do správného stavu;FALSE
+Ringbak requested, but;Zavolání zpět vyžádáno, ale nelze nalézt zmeškaný hovor;FALSE
+503;503 CHYBA - hovor nepřešel do správného stavu;FALSE
+408;408 CHYBA - hovor nepřešel do správného stavu;FALSE
+Can't find last area for radio;Nejde najít poslední oblast pro vysílačku;FALSE
+200 Remote site ended connected call.;Dispečer zavěsil;TRUE
+200 Connected call ended due to inactivity;Hovor skončil po vypršení timeoutu;TRUE
+200 - OK;OK - Hovor ukončen;TRUE
+Call ended by another call;OK;TRUE
+Call is interupted by priority call;OK - Hovor byl přerušen příchozím dispečerským voláním;TRUE
+Call is interupted by more important one;OK - Hovor byl přerušen hovorem od dispečera;TRUE
+Call timed out;OK;TRUE
+200;OK;TRUE
