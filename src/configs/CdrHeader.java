@@ -10,55 +10,54 @@ package configs;
 
 public enum CdrHeader implements Header {
 
-	ORIG_CAUSE_CDR_HEADER("origCause_value"),
-	ORIG_CALLED_CDR_HEADER("originalCalledPartyNumber"),
-	FINAL_CALLED_CDR_HEADER("finalCalledPartyNumber"),
-	DEST_CAUSE_CDR_HEADER("destCause_value"),
-	ORIG_CALLED_PARTITION_CDR_HEADER("originalCalledPartyNumberPartition"),
-	DURATION_CDR_HEADER("duration"),
-	ORIG_DEVICE_CDR_HEADER("origDeviceName"),
-	DEST_DEVICE_CDR_HEADER("destDeviceName"),
-	ORIG_IP_V6_CDR_HEADER("origIpv4v6Addr"),
-	DEST_IP_V4_CDR_HEADER("destIpv4v6Addr"),
-	ORIG_IP_CDR_HEADER("origIpAddr"),
-	CALLING_PARTY_CDR_HEADER("callingPartyNumber"),
-	DEST_IP_CDR_HEADER("destIpAddr"),
-	TIME_CONNECT_CDR_HEADER("dateTimeConnect"),
-	TIME_DISCONNECT_CDR_HEADER("dateTimeDisconnect"),
+	ORIG_CALLED_PARTY_NUMBER("originalCalledPartyNumber", "Z čísla"),
+	CALLING_PARTY_NUMBER("callingPartyNumber", "Na číslo"),
+	FINAL_CALLED_PARTY_NUMBER("finalCalledPartyNumber", "Na číslo finální"),
+	ORIG_IP_ADDR("origIpAddr", "IP adresa Z"),
+	DEST_IP_ADDR("destIpAddr", "IP adresa Na"),
+	ORIG_CAUSE_VALUE("origCause_value", "Ukončení Z (cause value)"),
+	DEST_CAUSE_VALUE("destCause_value", "Ukončení Na"),
+	DATETIME_CONNECT("dateTimeConnect", "Začátek hovoru"),
+	DATETIME_DISCONNECT("dateTimeDisconnect", "Konec hovoru"),
+	DURATION("duration", "Délka hovoru"),
+	ORIG_DEVICE_NAME("origDeviceName", "Zařízení Z"),
+	DEST_DEVICE_NAME("destDeviceName", "Zařízení Na"),
+	TERMINAL("terminal", "Terminál"),
+	TERMINAL_IP("terminal_ip", "IP terminál"),
+	HOSTNAME("hostname", "HostName"),
+	DAY("day", "Den v týdnu"),
 
-	TERMINAL_CDR_HEADER("terminál"),
-	TERMINAL_IP_CDR_HEADER("terminál-ip"),
-	HOSTNAME_CDR_HEADER("hostName"),
-	TYPE_CDR_HEADER("typ"),
-	LOCALITY_CDR_HEADER("lokalita"),
-	AREA_CDR_HEADER("oblast"),
-	DAY_CDR_HEADER("den"),
-	INCOMING_TERMINAL_FROM_MOBILE("příchozí volání z mobilu"),
-	OUTGOING_TERMINAL_TO_MOBILE("odchozí volání na mobil"),
-	INCOMING_TERMINAL_FROM_TRANSMITTER("příchozí volání z vysílačky"),
-	OUTGOING_TERMINAL_TO_TRANSMITTER("odchozí volání na vysílačku"),
-	INCOMING_TERMINAL_FROM_OTHERS("příchozí volání z pevné linky"),
-	OUTGOING_TERMINAL_TO_OTHERS("odchozí volání na pevnou linku"),
-	MISSED_FROM_MOBILE("nepřijaté hovory z mobilu"),
-	MISSED_ON_MOBILE("nevyzvednuté hovory mobilem"),
-	MISSED_FROM_TRANSMITTER("nepřijaté hovory z vysílačky"),
-	MISSED_ON_TRANSMITTER("nevyzvednuté hovory vysílačkou"),
-	MISSED_FROM_OTHERS("nepřijaté hovory z pevné linky"),
-	MISSED_ON_OTHERS("nevyzvednuté hovory pevnou linkou"),
-	FAIL_TO_MOBILE("neúspěšné volání na mobil"),
-	FAIL_FROM_MOBILE("neúspěšné volání z mobilu"),
-	FAIL_TO_TRANSMITTER("neúspěšné volání na vysílačku"),
-	FAIL_FROM_TRANSMITTER("neúspěšné volání z vysílačky"),
-	FAIL_TO_LANDLINE("neúspěšné volání na pevnou linku"),
-	FAIL_FROM_LANDLINE("neúspěšné volání z pevné linky");
+	INCOMING_TERMINAL_FROM_MOBILE("incoming_terminal_from_mobile", "příchozí volání z mobilu"),
+	OUTGOING_TERMINAL_TO_MOBILE("outgoing_terminal_to_mobile", "odchozí volání na mobil"),
+	INCOMING_TERMINAL_FROM_TRANSMITTER("incoming_terminal_from_transmitter", "příchozí volání z vysílačky"),
+	OUTGOING_TERMINAL_TO_TRANSMITTER("outgoing_terminal_to_transmitter", "odchozí volání na vysílačku"),
+	INCOMING_TERMINAL_FROM_OTHERS("incoming_terminal_from_others", "příchozí volání z pevné linky"),
+	OUTGOING_TERMINAL_TO_OTHERS("outgoing_terminal_to_others", "odchozí volání na pevnou linku"),
+	MISSED_FROM_MOBILE("missed_from_mobile", "nepřijaté hovory z mobilu"),
+	MISSED_ON_MOBILE("missed_on_mobile", "nevyzvednuté hovory mobilem"),
+	MISSED_FROM_TRANSMITTER("missed_from_transmitter", "nepřijaté hovory z vysílačky"),
+	MISSED_ON_TRANSMITTER("missed_on_transmitter", "nevyzvednuté hovory vysílačkou"),
+	MISSED_FROM_OTHERS("missed_from_others", "nepřijaté hovory z pevné linky"),
+	MISSED_ON_OTHERS("missed_on_others", "nevyzvednuté hovory pevnou linkou"),
+	FAIL_TO_MOBILE("fail_to_mobile", "neúspěšné volání na mobil"),
+	FAIL_FROM_MOBILE("fail_from_mobile", "neúspěšné volání z mobilu"),
+	FAIL_TO_TRANSMITTER("fail_to_transmitter", "neúspěšné volání na vysílačku"),
+	FAIL_FROM_TRANSMITTER("fail_from_transmitter", "neúspěšné volání z vysílačky"),
+	FAIL_TO_LANDLINE("fail_to_landline", "neúspěšné volání na pevnou linku"),
+	FAIL_FROM_LANDLINE("fail_from_landline", "neúspěšné volání z pevné linky");
 
-	private final String description;
+	private final String code;
+	private final String translation;
 
-	CdrHeader(String description) {
-		this.description = description;
+	CdrHeader(String code, String translation) {
+		this.code = code;
+		this.translation = translation;
 	}
 
-	public String getDescription() {
-		return description;
+	public String getCode() {
+		return code;
+	}
+	public String getTranslation() {
+		return translation;
 	}
 }

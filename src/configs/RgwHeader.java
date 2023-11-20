@@ -9,36 +9,35 @@
 package configs;
 
 public enum RgwHeader implements Header {
-	FROM_HEADER("Z čísla"),
-	TO_HEADER("Na číslo"),
-	AREA_HEADER("Oblast"),
-	DIRECTION_HEADER("Směr volání"),
-	RGW_HEADER_HEADER("Radio-gateway ip"),
-	CONNECTED_TIME_HEADER("Začátek hovoru"),
-	CALL_END_TIME_HEADER("Konec hovoru"),
-	EXIT_CODE_HEADER("Exit code"),
-	RGW_NAME_HEADER("Radio-gateway jméno"),
-	MESSAGE_HEADER("Výstup"),
-	USPECH_HEADER("Spojený hovor"),
-	DURATION_HEADER("Délka hovoru"),
-	DAY_HEADER("Den v týdnu"),
-	FROM("from"),
-	TO("to"),
-	AREA("area"),
-	DIRECTION("direction"),
-	RGW_HEADER("rgw"),
-	CONNECTED_TIME("connectedTime"),
-	CALL_END_TIME("callEndTime"),
-	EXIT_CODE("exitCode");
+	FROM("from", "Z čísla"),
+	TO("to", "Na číslo"),
+	AREA("area", "Oblast"),
+	DIRECTION("direction", "Směr volání"),
+	RGW_HEADER("rgw", "Radio-gateway ip"),
+	CONNECTED_TIME("connectedTime", "Začátek hovoru"),
+	CALL_END_TIME("callEndTime", "Konec hovoru"),
+	EXIT_CODE("exitCode", "Exit code"),
+	RGW_NAME("rgw-name", "Radio-gateway jméno"),
+	MESSAGE("message", "Výstup"),
+	SUCCESS("success", "Spojený hovor"),
+	DURATION("duration", "Délka hovoru"),
+	DAY("day", "Den v týdnu");
 
-	private final String description;
+	private final String code;
+	private final String translation;
 
-	RgwHeader(String description) {
-		this.description = description;
+	RgwHeader(String code, String translation) {
+		this.code = code;
+		this.translation = translation;
 	}
 
-	public String getDescription() {
-		return description;
+	@Override
+	public String getCode() {
+		return code;
 	}
 
+	@Override
+	public String getTranslation() {
+		return translation;
+	}
 }

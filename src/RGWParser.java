@@ -1,3 +1,4 @@
+import configs.Header;
 import configs.RgwHeader;
 import types.Area;
 import types.Direction;
@@ -14,12 +15,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static configs.CdrFiles.*;
 import static configs.RgwHeader.*;
 
 public class RGWParser implements Parser {
-    private String csvRepository;
-    private String cdrRepository;
+    private String rgwRepository;
+    private String outputFileName;
+
+    private String csvRepository = "/home/matejik/git/cdrparser/csv/";
+
     Map<String, Area> areasHashmap;
     Map<String, Direction> directionsHashmap;
     Map<String, Rgw> rgwsHashmap;
@@ -30,7 +33,7 @@ public class RGWParser implements Parser {
     private DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
     private ZoneId cestZone = ZoneId.of("Europe/Paris");
 
-    private RgwHeader[] mappedHeaders = new RgwHeader[] {
+    private RgwHeader[] headersToPrint = new RgwHeader[] {
             FROM,
             TO,
             AREA,
@@ -38,28 +41,17 @@ public class RGWParser implements Parser {
             RGW_HEADER,
             CONNECTED_TIME,
             CALL_END_TIME,
-            EXIT_CODE
+            RGW_NAME,
+            EXIT_CODE,
+            MESSAGE,
+            SUCCESS,
+            DAY,
+            DURATION
     };
 
-    private RgwHeader[] headersToPrint = new RgwHeader[] {
-            FROM_HEADER,
-            TO_HEADER,
-            AREA_HEADER,
-            DIRECTION_HEADER,
-            RGW_HEADER_HEADER,
-            CONNECTED_TIME_HEADER,
-            CALL_END_TIME_HEADER,
-            EXIT_CODE_HEADER,
-            RGW_NAME_HEADER,
-            MESSAGE_HEADER,
-            USPECH_HEADER,
-            DAY_HEADER,
-            DURATION_HEADER
-    };
-
-    public RGWParser(String csvRepository, String cdrRepository) throws IOException {
-        this.csvRepository = csvRepository;
-        this.cdrRepository = cdrRepository;
+    public RGWParser(String rgwRepository, String outputFileName) throws IOException {
+        this.rgwRepository = rgwRepository;
+        this.outputFileName = outputFileName;
 
         rgwsHashmap = new HashMap<>();
         areasHashmap = new HashMap<>();
@@ -71,7 +63,7 @@ public class RGWParser implements Parser {
         parseExitFile();
         parseDirectionFile();
 
-        writer = new PrintWriter(new BufferedWriter(new FileWriter(this.cdrRepository + "OUT")));
+        writer = new PrintWriter(new BufferedWriter(new FileWriter(this.outputFileName)));
         printHeaders();
 
     }
@@ -80,7 +72,7 @@ public class RGWParser implements Parser {
         StringBuilder sb = new StringBuilder();
 
         for (RgwHeader column: headersToPrint) {
-            sb.append(column.getDescription());
+            sb.append(column.getTranslation());
             sb.append(";");
         }
         sb.setLength(sb.length() - 1);
@@ -90,7 +82,7 @@ public class RGWParser implements Parser {
     }
 
     private void parseAreaFile() throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(this.csvRepository + AREAS))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(this.csvRepository + "area.csv"))) {
             String line;
             reader.readLine();
             while ((line = reader.readLine()) != null) {
@@ -101,7 +93,7 @@ public class RGWParser implements Parser {
     }
 
     private void parseDirectionFile() throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(this.csvRepository + DIRECTIONS))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(this.csvRepository + "direction.csv"))) {
             String line;
             reader.readLine();
             while ((line = reader.readLine()) != null) {
@@ -112,7 +104,7 @@ public class RGWParser implements Parser {
     }
 
     private void parseRgwFile() throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(this.csvRepository + RGW))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(this.csvRepository + "rgw.csv"))) {
             String line;
             reader.readLine();
             while ((line = reader.readLine()) != null) {
@@ -123,7 +115,7 @@ public class RGWParser implements Parser {
     }
 
     private void parseExitFile() throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(this.csvRepository + EXIT_CODES))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(this.csvRepository + "exitCode.csv"))) {
             String line;
             reader.readLine();
             while ((line = reader.readLine()) != null) {
@@ -133,81 +125,97 @@ public class RGWParser implements Parser {
         }
     }
 
-    public void parseCdrFile(String filePath) throws IOException {
+    @Override
+    public void parseFile(String filePath) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            reader.readLine();
-            Map<String, Integer> indices = new HashMap<>();
-            while ((line = reader.readLine()) != null && !(line.trim().equals("")) ) {
-                parseDataRow(indices, line);
+            String line = reader.readLine();
+            if (line != null) {
+                // Parse data rows
+                while ((line = reader.readLine()) != null && !(line.trim().equals("")) ) {
+                    parseDataRow(line);
+                }
             }
         }
     }
 
-    private void parseDataRow(Map<String, Integer> indices, String line) throws IOException {
+    private void parseDataRow(String line) throws IOException {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
         String[] dataArray = line.replaceAll("\"", "").split(", ", -1);
 
-        Map<String, String> dataMap = Arrays.stream(dataArray)
+        Map<Header, String> dataMap = Arrays.stream(dataArray)
                 .map(pair -> pair.split("="))
-                .filter(parts -> parts.length == 2)
-                .collect(Collectors.toMap(parts -> parts[0], parts -> parts[1]));
+                .filter(parts -> parts.length == 2 && Header.getByCode(RgwHeader.class, parts[0]) != null)
+                .collect(Collectors.toMap(parts -> Header.getByCode(RgwHeader.class, parts[0]), parts -> parts[1]));
 
         parseDateTime(dataMap);
 
-//        if (dataMap.get(FROM).contains("#")) {
-//            dataMap.put(FROM, dataMap.get(FROM).split("#")[0]);
-//        }
-//        if (dataMap.get(TO.getDescription()).contains("#")) {
-//            dataMap.put(TO, dataMap.get(TO).split("#")[0]);
-//        }
-//
-//        Area area = this.areasHashmap.get(dataMap.get(AREA));
-//        if (area != null) {
-//            dataMap.put(TO, area.getName());
-//        }
-//        Direction direction = this.directionsHashmap.get(dataMap.get(DIRECTION));
-//        if (direction != null) {
-//            dataMap.put(DIRECTION, direction.getName());
-//        }
-//
-//        dataMap.put(DIRECTION, dataMap.get(DIRECTION));
-//
-//        StringBuilder sb = new StringBuilder();
-//
-//        for (String column: mappedHeaders) {
-//            sb.append(dataMap.get(column));
-//            sb.append(";");
-//        }
+        if (dataMap.get(FROM).contains("#")) {
+            dataMap.put(FROM, dataMap.get(FROM).split("#")[0]);
+        }
 
-//        appendTerminalInfo(sb, dataMap);
-//
-//        sb.append("\n");
-//
-//        writer.write(sb.toString());
-//        writer.flush();
-    }
+        if (dataMap.get(TO).contains("#")) {
+            dataMap.put(TO, dataMap.get(TO).split("#")[0]);
+        }
 
-    private void parseDateTime(Map<String, String> dataMap) {
-//        try {
-//            String trimmedStartTimeStr = dataMap.get(CONNECTED_TIME).replace("CEST ", "").trim();
-//            String trimmedEndTimeStr = dataMap.get(CALL_END_TIME).replace("CEST ", "").trim();
-//
-//            ZonedDateTime zonedStartTime = ZonedDateTime.parse(trimmedStartTimeStr, formatter.withZone(cestZone));
-//            ZonedDateTime zonedEndTime = ZonedDateTime.parse(trimmedEndTimeStr, formatter.withZone(cestZone));
-//
-//            dataMap.put(CONNECTED_TIME, zonedStartTime.format(outputFormatter));
-//            dataMap.put(CALL_END_TIME, zonedEndTime.format(outputFormatter));
-//        } catch (Exception e) {
-//            dataMap.put(CONNECTED_TIME, "");
-//            dataMap.put(CALL_END_TIME, "");
-//        }
-    }
+        Area area = this.areasHashmap.get(dataMap.get(AREA));
+        if (area != null) {
+            dataMap.put(AREA, area.getName());
+        }
 
-    private void appendTerminalInfo(StringBuilder sb, Map<String, String> dataMap) {
+        Direction direction = this.directionsHashmap.get(dataMap.get(DIRECTION));
+        if (direction != null) {
+            dataMap.put(DIRECTION, direction.getName());
+        }
+
+        dataMap.put(DIRECTION, dataMap.get(DIRECTION));
+
+        StringBuilder sb = new StringBuilder();
+
+        for (RgwHeader column: Arrays.asList(headersToPrint).subList(0, 5)) {
+            sb.append(dataMap.get(column));
+            sb.append(";");
+        }
+
         try {
             sb.append(this.rgwsHashmap.get(dataMap.get(RGW_HEADER)).getRgw()).append(";");
+        } catch (Exception e) {
+            sb.append(";");
+        }
+
+        for (RgwHeader column: Arrays.asList(headersToPrint).subList(5, 7)) {
+            sb.append(dataMap.get(column));
+            sb.append(";");
+        }
+
+
+        appendTerminalInfo(sb, dataMap);
+
+        sb.append("\n");
+
+        writer.write(sb.toString());
+        writer.flush();
+    }
+
+    private void parseDateTime(Map<Header, String> dataMap) {
+        try {
+            String trimmedStartTimeStr = dataMap.get(CONNECTED_TIME).replace("CEST ", "").replace("CET ", "").trim();
+            String trimmedEndTimeStr = dataMap.get(CALL_END_TIME).replace("CEST ", "").replace("CET ", "").trim();
+
+            ZonedDateTime zonedStartTime = ZonedDateTime.parse(trimmedStartTimeStr, formatter.withZone(cestZone));
+            ZonedDateTime zonedEndTime = ZonedDateTime.parse(trimmedEndTimeStr, formatter.withZone(cestZone));
+
+            dataMap.put(CONNECTED_TIME, zonedStartTime.format(outputFormatter));
+            dataMap.put(CALL_END_TIME, zonedEndTime.format(outputFormatter));
+        } catch (Exception e) {
+            dataMap.put(CONNECTED_TIME, "");
+            dataMap.put(CALL_END_TIME, "");
+        }
+    }
+
+    private void appendTerminalInfo(StringBuilder sb, Map<Header, String> dataMap) {
+        try {
+            sb.append(this.exitCodesHashmap.get(dataMap.get(EXIT_CODE)).getExitCode()).append(";");
         } catch (Exception e) {
             sb.append(";");
         }
@@ -236,11 +244,6 @@ public class RGWParser implements Parser {
 
     public void parseClose() {
         writer.close();
-    }
-
-    @Override
-    public void parseFile(String filePath) throws IOException {
-
     }
 }
 
